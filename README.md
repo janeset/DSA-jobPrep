@@ -20,6 +20,7 @@ Then visit http://localhost:5173.
 | Page | What it does |
 | --- | --- |
 | Home | Hub with progress for all three tracks and a suggested weekly rhythm |
+| AWS Certs | Exam prep for CLF-C02, SAA-C03, AIF-C01 and AIP-C01: official domains and weightings, study notes, readiness checklists, week-by-week plans, timed practice exams and tutor mode with per-domain results |
 | Cloud / AI tracks | Overview, roadmap, lessons (AWS vs Azure maps; runnable Python exercises for AI), interview question bank, exam-style quiz, hands-on labs/projects with resume bullets, certification paths |
 | DSA: Today | Greeting, progress ring, this week's problems, spaced-repetition reviews, refresher progress |
 | Roadmap | 12 weeks, one pattern family at a time |
@@ -44,8 +45,10 @@ solution, plus links to online compilers.
 | `refresher.js`, `langlessons.js` | Python, Java and C# lessons and exercises |
 | `bigo.js`, `datastructures.js` | Big-O and data-structure content |
 | `videos.js` | YouTube video IDs (each verified for channel and title) |
-| `cloud.js`, `ai.js` | Cloud and AI/LLM track content |
+| `cloud.js`, `ai.js` | Cloud and AI/LLM track content (`ai.js` also holds the track registry and `extendTrack`) |
+| `cloud-more.js`, `ai-more.js` | Extra lessons, exercises, glossaries and questions merged into the tracks |
 | `trackview.js` | Track engine (overview, learn, questions, quiz, labs, certs) and the Home page |
+| `awscerts.js`, `awsview.js` | AWS certification content and the practice-exam engine |
 | `systemdesign.js` | System design lessons and case studies |
 
 ## Your data

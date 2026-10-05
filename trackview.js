@@ -10,11 +10,12 @@ const TRACK_ICON = {
   dsa: `<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="18" r="2.2"/><path d="M11 7 7 16M13 7l4 9"/></svg>`,
   cloud: `<svg viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .4-8A6 6 0 0 0 6.4 9.2 4.5 4.5 0 0 0 7 18z"/></svg>`,
   ai: `<svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>`,
+  aws: `<svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M8.5 13 7 21l5-2.5L17 21l-1.5-8"/></svg>`,
 };
 
 function sectionOf(t) {
   if (DSA_TABS.some(([k]) => k === t)) return "dsa";
-  const m = /^(cloud|ai):/.exec(t);
+  const m = /^(cloud|ai|aws):/.exec(t);
   return m ? m[1] : null;
 }
 
@@ -56,9 +57,9 @@ function renderNav() {
   const sub = $("#subnav");
   if (!sub) return;
   if (!sec) { sub.hidden = true; sub.innerHTML = ""; return; }
-  const items = sec === "dsa" ? DSA_TABS : TRACK_TABS(sec).map(([k, l]) => [sec + ":" + k, l]);
+  const items = sec === "dsa" ? DSA_TABS : sec === "aws" ? AWS_TABS.map(([k, l]) => ["aws:" + k, l]) : TRACK_TABS(sec).map(([k, l]) => [sec + ":" + k, l]);
   sub.hidden = false;
-  sub.innerHTML = `<div class="subnav-inner"><span class="subnav-title t-${sec}">${TRACK_ICON[sec]}${sec === "dsa" ? "DSA Prep" : esc(TRACKS[sec].name)}</span>
+  sub.innerHTML = `<div class="subnav-inner"><span class="subnav-title t-${sec}">${TRACK_ICON[sec]}${sec === "dsa" ? "DSA Prep" : sec === "aws" ? "AWS Certs" : esc(TRACKS[sec].name)}</span>
     <div class="subnav-tabs">${items.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? "active" : ""}">${esc(l)}</button>`).join("")}</div></div>`;
 }
 function go(t) {
@@ -107,7 +108,7 @@ function homeView() {
         </div>
       </div>
     </section>
-    <div class="track-grid">${dsaCard}${trackCard("cloud")}${trackCard("ai")}</div>
+    <div class="track-grid">${dsaCard}${trackCard("cloud")}${trackCard("ai")}${awsHomeCard()}</div>
     <div class="cols-2">
       <div class="card"><h3>A sustainable weekly rhythm</h3>
         <table><tr><th>Day</th><th>Focus</th></tr>
@@ -122,6 +123,15 @@ function homeView() {
         <div class="li"><div><span class="t">Weeks 9-12</span><div class="muted">DSA mocks, AI weeks 4-8 with projects, one cloud or AI certification, resume polish</div></div></div>
       </div><p class="muted">Applying to banks and insurers? Lean Azure. Startups and mid-size tech? Lean AWS. Both value the AI projects.</p></div>
     </div>`;
+}
+
+function awsHomeCard() {
+  const rows = AWS_EXAMS.map((e) => { const r = readiness(e); return `<div class="li"><div><span class="t">${esc(e.code)}</span><div class="muted">${esc(e.level)} · best ${r.best ? r.best + "%" : "-"}</div></div>
+    <div class="bar" style="width:70px;margin:0"><i style="width:${Math.round(r.pct * 100)}%"></i></div></div>`; }).join("");
+  return `<div class="card track-card t-aws">
+    <div class="tc-head"><span class="tc-icon">${TRACK_ICON.aws}</span><div><h3>AWS Certs</h3><p class="muted">Exam prep for CLF, SAA, AI Practitioner and GenAI Developer Pro</p></div></div>
+    <div class="list">${rows}</div>
+    <div class="row"><button class="btn primary" data-track-go="aws">Continue &rarr;</button></div></div>`;
 }
 
 // ---------------- track pages ----------------
@@ -197,13 +207,24 @@ function trRoadmap(T, st) {
 
 // ---------------- learn ----------------
 function trLearn(T, st) {
-  const id = T.id, sel = st.sel && (st.sel === "courses" || topicById(T, st.sel)) ? st.sel : T.topics[0].id;
+  const id = T.id, sel = st.sel && (st.sel === "courses" || st.sel === "glossary" || topicById(T, st.sel)) ? st.sel : T.topics[0].id;
   const side = T.groups.map(([g, tids]) => `<div class="side-h" style="cursor:default">${esc(g)}</div>` + tids.map((tid) => {
     const t = topicById(T, tid);
     return `<button class="side-i ${sel === tid ? "active" : ""}" data-trsel="${id}|${tid}"><span class="lbl">${esc(t.title)}</span><span class="muted lbl">${st.read[tid] ? "✓" : ""}</span></button>`;
-  }).join("")).join("") + `<div class="side-h" style="cursor:default">Courses</div><button class="side-i ${sel === "courses" ? "active" : ""}" data-trsel="${id}|courses"><span class="lbl">Full courses</span></button>`;
-  const body = sel === "courses" ? `<h2>Full courses</h2><p class="muted">Long-form videos to watch in chunks alongside the plan.</p><div class="card">${vids(T.videos.courses)}</div>` : trTopic(T, st, sel);
+  }).join("")).join("") + `<div class="side-h" style="cursor:default">Reference</div>
+    ${T.glossary && T.glossary.length ? `<button class="side-i ${sel === "glossary" ? "active" : ""}" data-trsel="${id}|glossary"><span class="lbl">Glossary</span><span class="muted lbl">${T.glossary.length}</span></button>` : ""}
+    <button class="side-i ${sel === "courses" ? "active" : ""}" data-trsel="${id}|courses"><span class="lbl">Full courses</span></button>`;
+  const body = sel === "courses" ? `<h2>Full courses</h2><p class="muted">Long-form videos to watch in chunks alongside the plan.</p><div class="card">${vids(T.videos.courses)}</div>`
+    : sel === "glossary" ? trGlossary(T) : trTopic(T, st, sel);
   return `<div class="ref-layout"><aside class="ref-side">${side}</aside><section class="ref-main">${body}</section></div>`;
+}
+
+function trGlossary(T) {
+  const q = ((views._trgl = views._trgl || {})[T.id] || "").toLowerCase();
+  const list = T.glossary.filter(([term, def]) => !q || term.toLowerCase().includes(q) || def.toLowerCase().includes(q));
+  return `<h2>Glossary <span class="muted">${list.length}</span></h2><p class="muted">Key terms in one line each. Great for a last review before an interview or exam.</p>
+    <div class="card toolbar"><label class="search">${ICON_SEARCH}<input data-trgl="${T.id}" placeholder="Search terms..." value="${esc(views._trgl[T.id] || "")}" autocomplete="off"></label></div>
+    <div class="card"><dl class="gloss">${list.map(([term, def]) => `<dt>${esc(term)}</dt><dd>${esc(def)}</dd>`).join("") || '<p class="muted">No matching terms.</p>'}</dl></div>`;
 }
 
 function trTopic(T, st, tid) {
@@ -311,7 +332,8 @@ function trCerts(T, st) {
         <div class="label" style="margin-top:10px">Covered in Learn</div><div>${c.topics.map((tid) => `<button class="tag tag-btn" ${goLearn(id, tid)}>${esc(topicById(T, tid).title)}</button>`).join("")}</div>
         <div class="row" style="margin-top:12px"><select data-trcert="${id}|${c.id}">${CERT_STATUSES.map((v) => `<option ${v === (s.status || "Not planned") ? "selected" : ""}>${v}</option>`).join("")}</select>
           <input type="date" data-trcertdate="${id}|${c.id}" value="${esc(s.date || "")}" title="Exam date"></div>
-        <div class="row" style="margin-top:12px"><button class="btn small primary" data-tqtag="${id}|${c.tag}">Practice questions</button>
+        <div class="row" style="margin-top:12px">${AWS_EXAMS.some((x) => x.code === c.code) ? `<button class="btn small primary" data-awsgo="${AWS_EXAMS.find((x) => x.code === c.code).id}">Open exam prep &rarr;</button>` : ""}
+          ${T.quiz.some((q) => q.tags.includes(c.tag)) ? `<button class="btn small ${AWS_EXAMS.some((x) => x.code === c.code) ? "" : "primary"}" data-tqtag="${id}|${c.tag}">Practice questions</button>` : ""}
           <a class="btn small ghost" href="${c.link}" target="_blank" rel="noopener">Official page &nearr;</a></div></div>`;
     }).join("")}</div>
     <div class="card"><h3>Full certification courses</h3>${vids(T.videos.courses)}</div>`;
@@ -414,4 +436,8 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => {
   const d = e.target.dataset || {};
   if (d.trcode) { const [id, tid, j] = d.trcode.split("|"); S.code[`tx:${id}:${tid}-${j}`] = e.target.value; save(); }
+  if (d.trgl) {
+    views._trgl[d.trgl] = e.target.value; const pos = e.target.selectionStart; render();
+    const el = document.querySelector(`[data-trgl="${d.trgl}"]`); el.focus(); el.setSelectionRange(pos, pos);
+  }
 });
