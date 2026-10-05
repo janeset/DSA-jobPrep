@@ -191,6 +191,8 @@ const views = {
             <button class="btn small" data-goto="refreshers" data-ref="py:basics">Open</button></div>
           ${["java", "cs"].map((lg) => { const t = langTotals(lg), m = LANG_META[lg]; return `<div class="li"><div><span class="t">${m.name}</span><div class="muted">${t.done} / ${t.total} exercises done</div><div class="bar" style="width:180px"><i style="width:${t.total ? (100 * t.done / t.total) | 0 : 0}%"></i></div></div>
             <button class="btn small" data-goto="refreshers" data-ref="${m.prefix}basics">Open</button></div>`; }).join("")}
+          ${(() => { const n = SD.filter((d) => S.sdRead?.[d.id]).length; return `<div class="li"><div><span class="t">System design</span><div class="muted">${n} / ${SD.length} topics reviewed</div><div class="bar" style="width:180px"><i style="width:${(100 * n / SD.length) | 0}%"></i></div></div>
+            <button class="btn small" data-goto="refreshers" data-ref="sd:framework">Open</button></div>`; })()}
           <div class="li"><div><span class="t">Big-O</span><div class="muted">${Object.keys(S.bigo).length} / ${BIGO_QUIZ.length} quiz questions</div><div class="bar" style="width:180px"><i style="width:${(boPct * 100) | 0}%"></i></div></div>
             <button class="btn small" data-goto="refreshers" data-ref="bigo">Open</button></div>
         </div>
@@ -224,6 +226,8 @@ const views = {
       + grp("Java", JAVA_LESSONS.map((l, i) => ["j:" + l.id, lessonLabel(l), `${langLessonDone("java", l)}/${l.exercises.length}`, "J" + (i + 1)]))
       + grp("C#", CS_LESSONS.map((l, i) => ["c:" + l.id, lessonLabel(l), `${langLessonDone("cs", l)}/${l.exercises.length}`, "C" + (i + 1)]))
       + grp("Complexity", [["bigo", "Big-O", `${Object.keys(S.bigo).length}/${BIGO_QUIZ.length}`, "O(n)"]])
+      + grp("System design", SD.map((d) => ["sd:" + d.id, d.title.replace(/^Design an? /, "").replace(/^Object-oriented design: /, "OOD: ").replace(/^\w/, (c) => c.toUpperCase()),
+          d.kind === "case" ? `${sdChecked(d)}/${d.rubric.length}` : (S.sdRead?.[d.id] ? "✓" : ""), d.short]))
       + grp("Data structures", [["ds:overview", "Overview & cheat sheet", "", "≡"], ...DS.map((d) => ["ds:" + d.id, d.name, "", d.short])])
       + grp("DSA patterns", Object.keys(NOTES).map((k) => ["pat:" + k, CATS[k]]))
       + grp("Courses", [["courses", "Full courses", "", "▶"]]);
@@ -232,6 +236,7 @@ const views = {
     else if (sel.startsWith("j:") && JAVA_LESSONS.some((l) => l.id === sel.slice(2))) body = refLang("java", sel.slice(2));
     else if (sel.startsWith("c:") && CS_LESSONS.some((l) => l.id === sel.slice(2))) body = refLang("cs", sel.slice(2));
     else if (sel === "bigo") body = refBigo();
+    else if (sel.startsWith("sd:") && SD.some((d) => d.id === sel.slice(3))) body = refSD(sel.slice(3));
     else if (sel === "ds:overview") body = refDSOverview();
     else if (sel.startsWith("ds:") && DS.some((d) => d.id === sel.slice(3))) body = refDS(sel.slice(3));
     else if (sel.startsWith("pat:") && NOTES[sel.slice(4)]) body = refPattern(sel.slice(4));
@@ -316,6 +321,8 @@ const views = {
         <td><button class="btn small" data-cdel="${i}">Remove</button></td></tr>`).join("")}</table>` : `<p class="muted">Add companies you're applying to.</p>`}</div>`;
   },
 
+  home() { return homeView(); },
+
   settings() {
     const cur = S.theme || "system";
     const prev = (id) => `<div class="tp" data-theme="${id}"><div class="tp-card"><i class="l1"></i><i class="l2"></i><div class="row2"><i class="acc"></i><i class="ok"></i></div></div></div>`;
@@ -336,7 +343,9 @@ const views = {
           ${seg("data-dens", S.density || "comfortable", [["comfortable", "Comfortable"], ["compact", "Compact"]])}</div>
       </div>
       <div class="card"><h3>Your plan</h3>
-        <div class="setting"><div><b>Start date</b><div class="muted">Week 1 begins on this day. Today is week ${currentWeek()}.</div></div>
+        ${["cloud", "ai"].map((id) => { const s = trState(id); return `<div class="setting"><div><b>${esc(TRACKS[id].name)} start date</b><div class="muted">${s.start ? `Week ${trackWeek(id)} of ${TRACKS[id].weeks.length}.` : "Not started. Pick a date or start it from the track's Overview."}</div></div>
+          <input type="date" data-trstartdate="${id}" value="${s.start || ""}"></div>`; }).join("")}
+        <div class="setting"><div><b>DSA start date</b><div class="muted">Week 1 begins on this day. Today is week ${currentWeek()}.</div></div>
           <input type="date" id="s-start" value="${S.start}"></div>
         <div class="setting"><div><b>Problem level</b><div class="muted">Core suits banks and local employers, Mid adds startups, Stretch adds big-tech Hards.</div></div>
           <select id="s-level">${[1, 2, 3].map((l) => `<option value="${l}" ${S.maxLevel === l ? "selected" : ""}>${lvlName[l]} and below (${PROBLEMS.filter((p) => p.l <= l).length})</option>`).join("")}</select></div>
@@ -501,6 +510,97 @@ async function runExercise(i, j) {
   res.className = err ? "muted" : "s-solved";
   if (!err) { views._open = l.id; setTimeout(() => { const keep = res.textContent; render(); const r = $("#res-" + id); r.style.display = "block"; r.textContent = keep; r.className = "s-solved"; }, 0); }
 }
+// ---------- system design ----------
+const sdChecked = (d) => (d.rubric || []).filter((_, k) => S.sdCheck?.[`${d.id}:${k}`]).length;
+let sdDiagramSeq = 0;
+
+// Boxes in columns, with curved arrows from every box to every box in the next column.
+function sdDiagram(cols) {
+  const NW = 136, NH = 48, CG = 58, RG = 16, PAD = 12, id = "sdarr" + ++sdDiagramSeq;
+  const maxRows = Math.max(...cols.map((c) => c.length));
+  const H = maxRows * NH + (maxRows - 1) * RG + PAD * 2, W = cols.length * NW + (cols.length - 1) * CG + PAD * 2;
+  const pos = cols.map((col, ci) => {
+    const total = col.length * NH + (col.length - 1) * RG, y0 = (H - total) / 2;
+    return col.map((_, ri) => ({ x: PAD + ci * (NW + CG), y: y0 + ri * (NH + RG) }));
+  });
+  let edges = "";
+  for (let ci = 0; ci < cols.length - 1; ci++) for (const a of pos[ci]) for (const b of pos[ci + 1]) {
+    const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x - 3, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
+    edges += `<path d="M${x1} ${y1} C${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#${id})"/>`;
+  }
+  const nodes = cols.map((col, ci) => col.map((label, ri) => {
+    const p = pos[ci][ri], lines = label.split("\n"), cy = p.y + NH / 2 - (lines.length - 1) * 7.5;
+    return `<g class="sd-node${ci === 0 ? " first" : ""}"><rect x="${p.x}" y="${p.y}" width="${NW}" height="${NH}" rx="10"/>
+      ${lines.map((ln, k) => `<text x="${p.x + NW / 2}" y="${cy + k * 15}" text-anchor="middle" dominant-baseline="middle">${esc(ln)}</text>`).join("")}</g>`;
+  }).join("")).join("");
+  return `<div class="sd-diagram"><svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Architecture diagram: ${esc(cols.map((c) => c.join(", ").replace(/\n/g, " ")).join(" then "))}">
+    <defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+    ${edges}${nodes}</svg></div>`;
+}
+
+const SDC_FIELDS = [["dau", "Daily active users"], ["actions", "Writes per user per day"], ["ratio", "Reads per write"], ["size", "Bytes per item"], ["years", "Years retained"], ["peak", "Peak / average"]];
+function sdCalcCard() {
+  const c = views._sdc = views._sdc || { dau: 10000000, actions: 2, ratio: 10, size: 1000, years: 5, peak: 3 };
+  return `<div class="card"><div class="section-head"><h3>Estimate calculator</h3><span class="muted">Change any number</span></div>
+    <div class="calc-grid">${SDC_FIELDS.map(([k, l]) => `<label><span class="muted">${l}</span><input type="number" min="0" step="any" data-sdc="${k}" value="${c[k]}"></label>`).join("")}</div>
+    <div id="sdc-out" class="grid" style="margin-top:14px"></div></div>`;
+}
+function sdCalcUpdate() {
+  const out = $("#sdc-out"); if (!out) return;
+  const c = views._sdc, w = (c.dau * c.actions) / 86400, r = w * c.ratio, perDay = c.dau * c.actions * c.size;
+  const num = (n) => n >= 1e9 ? (n / 1e9).toFixed(1) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : n.toFixed(n < 10 ? 1 : 0);
+  const bytes = (b) => { const u = ["B", "KB", "MB", "GB", "TB", "PB", "EB"]; let i = 0; while (b >= 1000 && i < u.length - 1) { b /= 1000; i++; } return b.toFixed(b < 10 ? 1 : 0) + " " + u[i]; };
+  const tile = (label, val, sub) => `<div class="card"><div class="label">${label}</div><div class="stat">${val}</div><div class="muted">${sub}</div></div>`;
+  out.innerHTML = tile("Write QPS", num(w), `~${num(w * c.peak)}/s at peak`) + tile("Read QPS", num(r), `~${num(r * c.peak)}/s at peak`)
+    + tile("New data / day", bytes(perDay), `${bytes(perDay * 365)} per year`) + tile(`Storage, ${c.years} yr`, bytes(perDay * 365 * c.years), `~${bytes(perDay * 365 * c.years * 3)} with 3 replicas`)
+    + tile("Read bandwidth", bytes(r * c.size) + "/s", `~${bytes(r * c.size * c.peak)}/s at peak`);
+}
+
+function refSD(id) {
+  const i = SD.findIndex((d) => d.id === id), d = SD[i], read = !!S.sdRead?.[id];
+  const shown = views._sdq = views._sdq || {}, revealed = views._sdrev = views._sdrev || {};
+  const nav = `<div class="row between">${i > 0 ? `<button class="btn" data-ref="sd:${SD[i - 1].id}">&larr; Previous</button>` : "<span></span>"}
+    ${i < SD.length - 1 ? `<button class="btn primary" data-ref="sd:${SD[i + 1].id}">Next: ${esc(SD[i + 1].title)} &rarr;</button>` : `<button class="btn primary" data-ref="ds:overview">Next: Data structures &rarr;</button>`}</div>`;
+  const videos = `<div class="card"><div class="section-head"><h3>Videos</h3><a class="btn small" href="${yt("system design " + d.title)}" target="_blank" rel="noopener">More videos &nearr;</a></div>
+    ${SD_VIDEOS[id] && SD_VIDEOS[id].length ? vids(SD_VIDEOS[id]) : `<p class="muted">No verified video for this topic yet; the search link finds popular ones.</p>`}</div>`;
+  const doneBtn = `<button class="btn ${read ? "" : "primary"}" data-sdread="${id}">${read ? "Reviewed ✓ (undo)" : d.kind === "case" ? "Mark case study done" : "Mark as reviewed"}</button>`;
+
+  if (d.kind === "lesson") {
+    return `<div class="label">System design · Fundamentals</div><h2>${esc(d.title)}</h2>
+      <div class="card">${d.body}${d.diagram ? sdDiagram(d.diagram) : ""}${d.code ? `<pre>${esc(d.code)}</pre>` : ""}</div>
+      ${d.calc ? sdCalcCard() : ""}
+      <div class="card"><h3>Check yourself</h3>${d.cards.map(([q, a], k) => { const key = `${id}:${k}`; return `<div class="flash"><div class="row between"><b>${esc(q)}</b>
+        <button class="btn small ${shown[key] ? "ghost" : ""}" data-sdq="${key}">${shown[key] ? "Hide" : "Show answer"}</button></div>${shown[key] ? `<p class="flash-a">${esc(a)}</p>` : ""}</div>`; }).join("")}</div>
+      ${videos}<div class="row" style="margin-bottom:var(--gap)">${doneBtn}</div>${nav}`;
+  }
+
+  const ood = !!d.ood, open = !!revealed[id];
+  return `<div class="label">${ood ? "Object-oriented design" : "System design · Case study"}</div><h2>${esc(d.title)}</h2>
+    <div class="card"><div class="callout">${esc(d.prompt)}</div>
+      <h3>Ask before designing</h3><ul>${d.clarify.map((q) => `<li>${esc(q)}</li>`).join("")}</ul>
+      <h3>Your design</h3><p class="muted">Spend 20-30 minutes: requirements, estimates, API, data model, a diagram, then the hard parts. Notes save automatically.</p>
+      <textarea data-sdnotes="${id}" rows="8" placeholder="Requirements...&#10;Estimates...&#10;API...&#10;Data model...&#10;Components and flow...&#10;Bottlenecks and trade-offs...">${esc(S.code["sd:" + id] || "")}</textarea>
+      <div class="row" style="margin-top:10px"><button class="btn ${open ? "" : "primary"}" data-sdreveal="${id}">${open ? "Hide model answer" : "Reveal model answer"}</button></div></div>
+    ${open ? `
+      <div class="cols-2">
+        <div class="card"><h3>Functional requirements</h3><ul>${d.functional.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="card"><h3>Non-functional requirements</h3><ul>${d.nonfunctional.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      </div>
+      <div class="card"><h3>${ood ? "Scope" : "Estimates"}</h3><p>${d.estimates}</p></div>
+      <div class="card"><h3>${ood ? "Public interface" : "API"}</h3><pre>${esc(d.api)}</pre></div>
+      <div class="card"><h3>${ood ? "Core code (Java)" : "Data model"}</h3><pre>${esc(d.data)}</pre></div>
+      <div class="card"><h3>${ood ? "Class relationships" : "Architecture"}</h3>${sdDiagram(d.diagram)}</div>
+      <div class="card"><h3>Deep dives</h3>${d.deep.map(([h, p]) => `<div class="flash"><b>${esc(h)}</b><p class="flash-a">${esc(p)}</p></div>`).join("")}</div>
+      <div class="cols-2">
+        <div class="card"><h3>Trade-offs to name</h3><ul>${d.tradeoffs.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="card"><h3>Likely follow-ups</h3><ul>${d.followups.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+      </div>` : ""}
+    <div class="card"><div class="section-head"><h3>Self-check rubric</h3><span class="badge ${sdChecked(d) === d.rubric.length ? "done" : ""}">${sdChecked(d)} / ${d.rubric.length}</span></div>
+      <p class="muted">Tick what your design covered. Revisit the ones you missed in a few days.</p>
+      ${d.rubric.map((r, k) => `<label class="check"><input type="checkbox" data-sdcheck="${id}:${k}" ${S.sdCheck?.[`${id}:${k}`] ? "checked" : ""}><span>${esc(r)}</span></label>`).join("")}</div>
+    ${videos}<div class="row" style="margin-bottom:var(--gap)">${doneBtn}</div>${nav}`;
+}
+
 // ---------- Java / C# refreshers (self-checked exercises) ----------
 const LANG_META = {
   java: { name: "Java", lessons: () => JAVA_LESSONS, prefix: "j:", compiler: "https://www.jdoodle.com/online-java-compiler", compilerName: "JDoodle" },
@@ -562,17 +662,26 @@ function growth() {
     `<tr><td>${c}</td><td>${big(o)}</td><td>${o === Infinity || o > 1e300 ? "never" : time(o)}</td></tr>`).join("")}</table>`;
 }
 
-let tab = "today";
+let tab = "home";
 function render() {
-  $("#view").innerHTML = views[tab]();
-  document.querySelectorAll("#nav button").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+  const sec = sectionOf(tab);
+  if (sec === "cloud" || sec === "ai") $("#view").innerHTML = trackView(sec, tab.split(":")[1]);
+  else $("#view").innerHTML = (views[tab] || views.home)();
+  renderNav();
   if (tab === "refreshers" && S.refSel === "bigo") growth();
+  if (tab === "refreshers" && S.refSel === "sd:estimates") sdCalcUpdate();
   if (tab === "practice") {
     $("#timer").textContent = fmt(timerSec);
     $("#t-go").textContent = timerId ? "Pause" : "Start timer";
   }
 }
-$("#nav").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { tab = b.dataset.tab; render(); window.scrollTo(0, 0); } });
+$("#nav").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.track) { const k = b.dataset.track; go(S.lastTab?.[k] || (k === "dsa" ? "today" : k + ":overview")); }
+  else if (b.dataset.nav) go(b.dataset.nav);
+});
+$("#subnav").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) go(b.dataset.tab); });
 
 document.addEventListener("click", (e) => {
   const t = e.target;
@@ -586,9 +695,12 @@ document.addEventListener("click", (e) => {
   if (t.dataset.fs) { S.fontSize = t.dataset.fs; save(); applyTheme(); return render(); }
   if (t.dataset.dens) { S.density = t.dataset.dens; save(); applyTheme(); return render(); }
   if (t.closest("#theme-quick")) { S.theme = LIGHT_THEMES.has(resolvedTheme()) ? "dark" : "light"; save(); applyTheme(); return render(); }
-  if (t.closest("#brand")) { tab = "today"; render(); return window.scrollTo(0, 0); }
-  if (t.dataset.gotoTab) { tab = t.dataset.gotoTab; render(); return window.scrollTo(0, 0); }
+  if (t.closest("#brand")) return go("home");
+  if (t.dataset.gotoTab) return go(t.dataset.gotoTab);
   if (t.dataset.due) { views._f = { cat: "", diff: "", status: "due", q: "" }; tab = "problems"; render(); return window.scrollTo(0, 0); }
+  if (t.dataset.sdq) { views._sdq = views._sdq || {}; views._sdq[t.dataset.sdq] = !views._sdq[t.dataset.sdq]; const y = window.scrollY; render(); return window.scrollTo(0, y); }
+  if (t.dataset.sdreveal) { views._sdrev = views._sdrev || {}; views._sdrev[t.dataset.sdreveal] = !views._sdrev[t.dataset.sdreveal]; const y = window.scrollY; render(); return window.scrollTo(0, y); }
+  if (t.dataset.sdread) { S.sdRead = S.sdRead || {}; S.sdRead[t.dataset.sdread] = !S.sdRead[t.dataset.sdread]; save(); const y = window.scrollY; render(); return window.scrollTo(0, y); }
   if (t.dataset.lsol) { views._lsol = views._lsol || {}; views._lsol[t.dataset.lsol] = !views._lsol[t.dataset.lsol]; const y = window.scrollY; render(); return window.scrollTo(0, y); }
   if (t.dataset.ldone) { S.langDone = S.langDone || {}; S.langDone[t.dataset.ldone] = !S.langDone[t.dataset.ldone]; save(); const y = window.scrollY; render(); return window.scrollTo(0, y); }
   if (t.dataset.lreset) { delete S.code["lx:" + t.dataset.lreset]; save(); const y = window.scrollY; render(); return window.scrollTo(0, y); }
@@ -658,6 +770,7 @@ document.addEventListener("click", (e) => {
 
 document.addEventListener("change", (e) => {
   const t = e.target;
+  if (t.dataset.sdcheck) { S.sdCheck = S.sdCheck || {}; S.sdCheck[t.dataset.sdcheck] = t.checked; save(); const y = window.scrollY; render(); return window.scrollTo(0, y); }
   if (t.id === "f-cat" || t.id === "f-diff" || t.id === "f-status") { views._f[t.id.slice(2)] = t.value; render(); }
   else if (t.id === "sf-cat") { views._sf.cat = t.value; render(); }
   else if (t.id === "p-sel") { S.code[views._slug || ""] = $("#code").value; save(); views._slug = t.value; render(); }
@@ -673,6 +786,8 @@ document.addEventListener("change", (e) => {
   }
 });
 document.addEventListener("input", (e) => {
+  if (e.target.dataset && e.target.dataset.sdnotes) { S.code["sd:" + e.target.dataset.sdnotes] = e.target.value; save(); return; }
+  if (e.target.dataset && e.target.dataset.sdc) { views._sdc[e.target.dataset.sdc] = Math.max(0, +e.target.value || 0); sdCalcUpdate(); return; }
   if (e.target.dataset && e.target.dataset.lx) { S.code["lx:" + e.target.dataset.lx] = e.target.value; save(); return; }
   if (e.target.id === "g-slider") { views._gi = +e.target.value; growth(); }
   if (e.target.id === "sf-q") {

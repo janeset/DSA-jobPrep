@@ -1,8 +1,9 @@
-# DSA Prep
+# Prep Hub
 
-A self-contained web app for a 12-week data structures & algorithms interview plan, tailored to
-software jobs around Toronto and Kitchener-Waterloo. No build step, no backend: plain HTML, CSS
-and JavaScript.
+A self-contained web app for interview prep, tailored to software jobs around Toronto and
+Kitchener-Waterloo, with three tracks: **DSA Prep** (12-week algorithms plan), **Cloud Prep**
+(AWS + Azure, 8 weeks) and **AI / LLM Prep** (8 weeks). No build step, no backend: plain HTML,
+CSS and JavaScript.
 
 ## Run it
 
@@ -16,9 +17,11 @@ Then visit http://localhost:5173.
 
 ## What's inside
 
-| Tab | What it does |
+| Page | What it does |
 | --- | --- |
-| Today | Greeting, progress ring, this week's problems, spaced-repetition reviews, refresher progress |
+| Home | Hub with progress for all three tracks and a suggested weekly rhythm |
+| Cloud / AI tracks | Overview, roadmap, lessons (AWS vs Azure maps; runnable Python exercises for AI), interview question bank, exam-style quiz, hands-on labs/projects with resume bullets, certification paths |
+| DSA: Today | Greeting, progress ring, this week's problems, spaced-repetition reviews, refresher progress |
 | Roadmap | 12 weeks, one pattern family at a time |
 | Refreshers | Python, Java and C# lessons with exercises; Big-O (growth calculator + quiz); data structures in Python/Java/C#; DSA pattern notes; full courses |
 | Problems | ~130 curated LeetCode problems filtered by level (Core / Mid / Stretch), with attempt logging |
@@ -41,6 +44,9 @@ solution, plus links to online compilers.
 | `refresher.js`, `langlessons.js` | Python, Java and C# lessons and exercises |
 | `bigo.js`, `datastructures.js` | Big-O and data-structure content |
 | `videos.js` | YouTube video IDs (each verified for channel and title) |
+| `cloud.js`, `ai.js` | Cloud and AI/LLM track content |
+| `trackview.js` | Track engine (overview, learn, questions, quiz, labs, certs) and the Home page |
+| `systemdesign.js` | System design lessons and case studies |
 
 ## Your data
 
