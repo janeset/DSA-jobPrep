@@ -22,6 +22,7 @@ Then visit http://localhost:5173.
 | --- | --- |
 | Home | Hub with progress for all three tracks and a suggested weekly rhythm |
 | Roles | Prep built from real job postings for AI Engineer, Cloud Engineer and AI Cloud Engineer: skill demand across postings, self-rating and readiness, per-posting fit and prep notes, gap lessons with runnable exercises, interview questions, quiz and capstone projects |
+| AI / LLM > IBM Videos | Learn-style side panel with every IBM Technology playlist (AI groups first; non-AI groups collapsible) playable in the app with done-tracking and links to matching lessons, an expandable list of every video in each playlist (play any one, tick it watched, filter), plus the IBM videos picked for each AI and Roles lesson and a title search |
 | AWS Certs | Exam prep for CLF-C02, SAA-C03, AIF-C01 and AIP-C01: official domains and weightings, study notes, readiness checklists, week-by-week plans, timed practice exams and tutor mode with per-domain results |
 | Cloud / AI tracks | Overview, roadmap, lessons (AWS vs Azure maps; runnable Python exercises for AI), interview question bank, exam-style quiz, hands-on labs/projects with resume bullets, certification paths |
 | DSA: Today | Greeting, progress ring, this week's problems, spaced-repetition reviews, refresher progress |
@@ -54,6 +55,8 @@ solution, plus links to online compilers.
 | `roles.js` | Role definitions, the shared skill catalog and the job postings (edit this to add a posting) |
 | `roles-learn.js` | Roles lessons, questions, quiz, projects and glossary (gaps not covered by the Cloud and AI tracks) |
 | `roleview.js` | Roles pages: demand, readiness, postings; reuses the track engine for Learn, Questions, Quiz and Projects |
+| `ibmvideos.js` | IBM Technology playlists and the IBM Videos tab |
+| `ibmplaylists.js` | Every video in each IBM playlist (id, title, length), fetched from YouTube |
 | `systemdesign.js` | System design lessons and case studies |
 
 ## Your data

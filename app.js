@@ -727,7 +727,7 @@ document.addEventListener("click", (e) => {
   if (t.dataset.probcat) { views._f = { cat: t.dataset.probcat, diff: "", status: "", q: "" }; tab = "problems"; render(); return window.scrollTo(0, 0); }
   const vc = t.closest(".vcard");
   if (vc) {
-    vc.outerHTML = `<div class="vcard playing"><div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vc.dataset.vid}?autoplay=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div></div>`;
+    vc.outerHTML = `<div class="vcard playing"><div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vc.dataset.plist ? "videoseries?list=" + vc.dataset.plist + "&" : vc.dataset.vid + "?"}autoplay=1" title="Video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div></div>`;
     return;
   }
   if (t.dataset.bq) {

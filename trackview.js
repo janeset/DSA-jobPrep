@@ -145,6 +145,7 @@ function trackView(id, sub) {
     case "quiz": return trQuiz(T, st);
     case "labs": return trLabs(T, st);
     case "certs": return trCerts(T, st);
+    case "ibm": return ibmView(T, st);
     default: return trOverview(T, st);
   }
 }
