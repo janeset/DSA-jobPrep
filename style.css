@@ -395,6 +395,7 @@ dialog textarea { font-family: var(--font); background: var(--surface); color: v
 .t-cloud { --tc: #0ea5e9; }
 .t-ai { --tc: #a855f7; }
 .t-aws { --tc: #f59e0b; }
+.t-roles { --tc: #10b981; }
 .hero.t-aws .ring .prog { stroke: var(--tc); }
 .hero.t-aws .eyebrow { color: var(--tc); }
 .hero.t-aws::after { background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 16%, transparent), transparent); }
@@ -410,7 +411,7 @@ dialog textarea { font-family: var(--font); background: var(--surface); color: v
 .ax-map button.flag { box-shadow: inset 0 -3px 0 var(--warn); }
 .ax-map button.cur { outline: 2px solid var(--accent); outline-offset: 1px; color: var(--text); }
 .timer.H { color: var(--bad); }
-[data-theme="contrast"] .t-cloud, [data-theme="contrast"] .t-ai, [data-theme="contrast"] .t-aws { --tc: var(--accent); }
+[data-theme="contrast"] .t-cloud, [data-theme="contrast"] .t-ai, [data-theme="contrast"] .t-aws, [data-theme="contrast"] .t-roles { --tc: var(--accent); }
 .nav-sep { width: 1px; height: 20px; background: var(--line-strong); margin: 0 6px; flex-shrink: 0; align-self: center; }
 .subnav { border-top: 1px solid var(--line); }
 .subnav-inner { max-width: 1180px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; gap: 18px; overflow-x: auto; scrollbar-width: none; }
@@ -432,9 +433,9 @@ dialog textarea { font-family: var(--font); background: var(--surface); color: v
 .tc-body { display: flex; gap: 16px; align-items: center; }
 .tc-meta { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; align-items: flex-start; }
 .track-card > .row { margin-top: auto; }
-.track-card .ring .prog, .hero.t-cloud .ring .prog, .hero.t-ai .ring .prog { stroke: var(--tc); }
-.hero.t-cloud .eyebrow, .hero.t-ai .eyebrow { color: var(--tc); }
-.hero.t-cloud::after, .hero.t-ai::after { background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 16%, transparent), transparent); }
+.track-card .ring .prog, .hero.t-cloud .ring .prog, .hero.t-ai .ring .prog, .hero.t-roles .ring .prog { stroke: var(--tc); }
+.hero.t-cloud .eyebrow, .hero.t-ai .eyebrow, .hero.t-roles .eyebrow { color: var(--tc); }
+.hero.t-cloud::after, .hero.t-ai::after, .hero.t-roles::after { background: radial-gradient(closest-side, color-mix(in srgb, var(--tc) 16%, transparent), transparent); }
 .home-hero { padding-bottom: calc(var(--pad) + 4px); }
 .quiz-opts { display: grid; gap: 8px; }
 .quiz-opt { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: 11px; background: var(--surface); color: var(--text); font: inherit; font-size: .92rem; cursor: pointer; transition: border-color .15s, background .15s; }
@@ -484,3 +485,19 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
    font shorthand on pre/textarea above can't reset it. */
 pre, code, textarea { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ===========================================================
+   Roles: role switcher, skill levels, postings
+   =========================================================== */
+.role-switch { margin-bottom: var(--gap); overflow-x: auto; scrollbar-width: none; }
+.role-switch .seg { flex-wrap: nowrap; }
+.role-switch .seg button { white-space: nowrap; }
+.tag.lv-confident { border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.tag.lv-learning { border-color: color-mix(in srgb, var(--warn) 45%, transparent); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.posting h3 { margin: 0; }
+.rl-tags .tag, .posting .tag { display: inline-block; height: auto; min-height: 24px; padding-top: 3px; padding-bottom: 3px; text-align: left; line-height: 1.35; }
+.posting ul { margin-top: 6px; }
+.skills-table td { vertical-align: top; }
+.skills-table select { min-width: 110px; }
+.show-sm { display: none; }
+@media (max-width: 700px) { .show-sm { display: block; margin-top: 4px; } }

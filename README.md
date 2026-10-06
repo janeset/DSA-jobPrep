@@ -2,7 +2,8 @@
 
 A self-contained web app for interview prep, tailored to software jobs around Toronto and
 Kitchener-Waterloo, with three tracks: **DSA Prep** (12-week algorithms plan), **Cloud Prep**
-(AWS + Azure, 8 weeks) and **AI / LLM Prep** (8 weeks). No build step, no backend: plain HTML,
+(AWS + Azure, 8 weeks) and **AI / LLM Prep** (8 weeks), plus a **Roles** section driven by real job
+postings for AI Engineer, Cloud Engineer and AI Cloud Engineer roles. No build step, no backend: plain HTML,
 CSS and JavaScript.
 
 ## Run it
@@ -20,6 +21,7 @@ Then visit http://localhost:5173.
 | Page | What it does |
 | --- | --- |
 | Home | Hub with progress for all three tracks and a suggested weekly rhythm |
+| Roles | Prep built from real job postings for AI Engineer, Cloud Engineer and AI Cloud Engineer: skill demand across postings, self-rating and readiness, per-posting fit and prep notes, gap lessons with runnable exercises, interview questions, quiz and capstone projects |
 | AWS Certs | Exam prep for CLF-C02, SAA-C03, AIF-C01 and AIP-C01: official domains and weightings, study notes, readiness checklists, week-by-week plans, timed practice exams and tutor mode with per-domain results |
 | Cloud / AI tracks | Overview, roadmap, lessons (AWS vs Azure maps; runnable Python exercises for AI), interview question bank, exam-style quiz, hands-on labs/projects with resume bullets, certification paths |
 | DSA: Today | Greeting, progress ring, this week's problems, spaced-repetition reviews, refresher progress |
@@ -49,6 +51,9 @@ solution, plus links to online compilers.
 | `cloud-more.js`, `ai-more.js` | Extra lessons, exercises, glossaries and questions merged into the tracks |
 | `trackview.js` | Track engine (overview, learn, questions, quiz, labs, certs) and the Home page |
 | `awscerts.js`, `awsview.js` | AWS certification content and the practice-exam engine |
+| `roles.js` | Role definitions, the shared skill catalog and the job postings (edit this to add a posting) |
+| `roles-learn.js` | Roles lessons, questions, quiz, projects and glossary (gaps not covered by the Cloud and AI tracks) |
+| `roleview.js` | Roles pages: demand, readiness, postings; reuses the track engine for Learn, Questions, Quiz and Projects |
 | `systemdesign.js` | System design lessons and case studies |
 
 ## Your data

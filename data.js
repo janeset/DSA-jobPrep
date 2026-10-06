@@ -287,7 +287,7 @@ const TIERS = [
     id: 3, name: "Banks, insurers & other local employers", bar: "Lower DSA bar", levels: 1,
     emphasis: "Easy/medium fundamentals: arrays, strings, hashing, linked lists, trees, sorting/searching. Interviews are often behavioural + a CoderPad or HackerRank screen + SQL/OOP/design questions. Communication and clean code matter a lot.",
     focus: ["arrays", "twoptr", "linked", "trees", "stack", "bsearch"],
-    names: ["RBC", "TD", "Scotiabank", "BMO", "CIBC", "Manulife", "Sun Life", "Canada Life", "Intact", "Equitable Bank", "Ontario Public Service"],
+    names: ["RBC", "TD", "Scotiabank", "BMO", "CIBC", "Manulife", "Sun Life", "Canada Life", "Intact", "Equitable Bank", "Ontario Public Service", "Eclipse Automation (Cambridge)"],
   },
 ];
 

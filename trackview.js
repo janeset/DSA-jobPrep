@@ -3,7 +3,7 @@
 // Loaded before app.js; it only calls app.js helpers (esc, $, vids, yt, execPy, render, S, save,
 // today, dayDiff, streak, included, isDone, refDone...) at event/render time, after app.js has run.
 
-const TRACK_TABS = (id) => [["overview", "Overview"], ["roadmap", "Roadmap"], ["learn", "Learn"], ["questions", "Questions"], ["quiz", "Quiz"], ["labs", TRACKS[id].labsName], ["certs", "Certs"]];
+const TRACK_TABS = (id) => TRACKS[id].tabs || [["overview", "Overview"], ["roadmap", "Roadmap"], ["learn", "Learn"], ["questions", "Questions"], ["quiz", "Quiz"], ["labs", TRACKS[id].labsName], ["certs", "Certs"]];
 const DSA_TABS = [["today", "Today"], ["roadmap", "Roadmap"], ["refreshers", "Refreshers"], ["problems", "Problems"], ["solutions", "Solutions"], ["practice", "Practice"]];
 const CERT_STATUSES = ["Not planned", "Planning", "Studying", "Booked", "Passed"];
 const TRACK_ICON = {
@@ -15,7 +15,7 @@ const TRACK_ICON = {
 
 function sectionOf(t) {
   if (DSA_TABS.some(([k]) => k === t)) return "dsa";
-  const m = /^(cloud|ai|aws):/.exec(t);
+  const m = /^(cloud|ai|aws|roles):/.exec(t);
   return m ? m[1] : null;
 }
 
@@ -102,13 +102,13 @@ function homeView() {
       <div style="position:relative;z-index:1">
         <div class="eyebrow">${esc(dateStr)} · Toronto &amp; Kitchener-Waterloo</div>
         <h1>${hello}.</h1>
-        <p>Three prep tracks for software roles: algorithms for coding rounds, cloud for the infrastructure questions, and AI/LLM engineering for the new wave of roles. Pick up wherever you left off.</p>
+        <p>Three prep tracks for software roles: algorithms for coding rounds, cloud for the infrastructure questions, and AI/LLM engineering for the new wave of roles. Roles ties them to real job postings. Pick up wherever you left off.</p>
         <div class="row" style="margin-top:14px">
           <span class="badge plain">&#128293; ${st} day streak</span><span class="badge plain">${todayCount} thing${todayCount === 1 ? "" : "s"} done today</span>
         </div>
       </div>
     </section>
-    <div class="track-grid">${dsaCard}${trackCard("cloud")}${trackCard("ai")}${awsHomeCard()}</div>
+    <div class="track-grid">${dsaCard}${trackCard("cloud")}${trackCard("ai")}${awsHomeCard()}${rolesHomeCard()}</div>
     <div class="cols-2">
       <div class="card"><h3>A sustainable weekly rhythm</h3>
         <table><tr><th>Day</th><th>Focus</th></tr>
@@ -213,7 +213,7 @@ function trLearn(T, st) {
     return `<button class="side-i ${sel === tid ? "active" : ""}" data-trsel="${id}|${tid}"><span class="lbl">${esc(t.title)}</span><span class="muted lbl">${st.read[tid] ? "✓" : ""}</span></button>`;
   }).join("")).join("") + `<div class="side-h" style="cursor:default">Reference</div>
     ${T.glossary && T.glossary.length ? `<button class="side-i ${sel === "glossary" ? "active" : ""}" data-trsel="${id}|glossary"><span class="lbl">Glossary</span><span class="muted lbl">${T.glossary.length}</span></button>` : ""}
-    <button class="side-i ${sel === "courses" ? "active" : ""}" data-trsel="${id}|courses"><span class="lbl">Full courses</span></button>`;
+    ${T.videos.courses && T.videos.courses.length ? `<button class="side-i ${sel === "courses" ? "active" : ""}" data-trsel="${id}|courses"><span class="lbl">Full courses</span></button>` : ""}`;
   const body = sel === "courses" ? `<h2>Full courses</h2><p class="muted">Long-form videos to watch in chunks alongside the plan.</p><div class="card">${vids(T.videos.courses)}</div>`
     : sel === "glossary" ? trGlossary(T) : trTopic(T, st, sel);
   return `<div class="ref-layout"><aside class="ref-side">${side}</aside><section class="ref-main">${body}</section></div>`;
@@ -247,7 +247,7 @@ function trTopic(T, st, tid) {
     ${exercises ? `<div class="label" style="margin:6px 0 8px">Coding exercises (run in your browser)</div>${exercises}` : ""}
     <div class="card"><h3>Check yourself</h3>${t.cards.map(([q, a], k) => { const key = `${id}:${tid}:${k}`; return `<div class="flash"><div class="row between"><b>${esc(q)}</b>
       <button class="btn small ${shown[key] ? "ghost" : ""}" data-trq="${key}">${shown[key] ? "Hide" : "Show answer"}</button></div>${shown[key] ? `<p class="flash-a">${esc(a)}</p>` : ""}</div>`; }).join("")}</div>
-    <div class="card"><div class="section-head"><h3>Videos</h3><a class="btn small" href="${yt(t.title + (id === "cloud" ? " AWS Azure explained" : " LLM explained"))}" target="_blank" rel="noopener">More videos &nearr;</a></div>
+    <div class="card"><div class="section-head"><h3>Videos</h3><a class="btn small" href="${yt(t.yt || t.title + (id === "cloud" ? " AWS Azure explained" : " LLM explained"))}" target="_blank" rel="noopener">More videos &nearr;</a></div>
       ${vlist.length ? vids(vlist) : `<p class="muted">No verified video for this topic yet; the search link finds popular ones. The full courses cover it too.</p>`}</div>
     <div class="row" style="margin-bottom:var(--gap)"><button class="btn ${read ? "" : "primary"}" data-trread="${id}|${tid}">${read ? "Reviewed ✓ (undo)" : "Mark as reviewed"}</button>
       <button class="btn ghost" data-trgo="${id}|questions|${tid}">Interview questions on this</button><button class="btn ghost" data-trgo="${id}|quiz|${tid}">Quiz on this</button></div>
@@ -285,10 +285,10 @@ function trQuiz(T, st) {
   const qs = set ? set.map((qid) => T.quiz.find((q) => q.id === qid)).filter(Boolean) : pool;
   const answered = qs.filter((q) => chosen[q.id] !== undefined), right = answered.filter((q) => chosen[q.id] === q.answer).length;
   const tags = [...new Set(T.quiz.flatMap((q) => q.tags))];
-  const certName = (tag) => (T.certs.find((c) => c.tag === tag) || {}).code || tag;
+  const certName = (tag) => (T.tagNames || {})[tag] || (T.certs.find((c) => c.tag === tag) || {}).code || tag;
   return pageHead("Practice quiz", "Exam-style multiple choice. Filter by certification or topic, or take a random 10-question set.") +
     `<div class="card toolbar">
-      <select data-tqf="${id}|tag"><option value="">All exams</option>${tags.map((t) => `<option value="${t}" ${f.tag === t ? "selected" : ""}>${esc(certName(t))}</option>`).join("")}</select>
+      <select data-tqf="${id}|tag"><option value="">${esc(T.tagLabel || "All exams")}</option>${tags.map((t) => `<option value="${t}" ${f.tag === t ? "selected" : ""}>${esc(certName(t))}</option>`).join("")}</select>
       <select data-tqf="${id}|topic"><option value="">All topics</option>${T.topics.map((t) => `<option value="${t.id}" ${f.topic === t.id ? "selected" : ""}>${esc(t.title)}</option>`).join("")}</select>
       <button class="btn primary" data-tqnew="${id}">Random 10</button>${set ? `<button class="btn" data-tqall="${id}">Show all ${pool.length}</button>` : ""}
       <button class="btn ghost" data-tqreset="${id}">Clear answers</button></div>
