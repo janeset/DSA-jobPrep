@@ -319,3 +319,30 @@ assert pick_region({"eu-west-1"}, ["ca-central-1"]) is None`,
     ["Vector database", "A store optimized for similarity search over embeddings."],
   ],
 });
+
+// IBM Technology explainers for every AI lesson (ids and titles confirmed via YouTube oEmbed),
+// appended after each lesson's existing videos.
+const IBM = (id, title) => V(id, title, "IBM Technology");
+const IBM_CHANNEL = { name: "IBM Technology", url: "https://www.youtube.com/@IBMTechnology" };
+AI.channel = IBM_CHANNEL;
+extendTrack(AI, {
+  videos: {
+    foundations: [IBM("5sLYAQS9sWQ", "How Large Language Models Work"), IBM("ZXiruGOCn9s", "What are Transformers (Machine Learning Model)?"), IBM("cfqtFvWOfg0", "Why Large Language Models Hallucinate"), IBM("qYNweeDHiyU", "AI, Machine Learning, Deep Learning and Generative AI Explained")],
+    apis: [IBM("pYax2rupKEY", "How to Choose Large Language Models: A Developer’s Guide to LLMs"), IBM("AVQzG2MY858", "LLM vs. SLM vs. FM: Choosing the Right AI Model"), IBM("lsMQRaeKNDk", "What is a REST API?")],
+    prompting: [IBM("1c9iyoVIwDs", "4 Methods of Prompt Engineering"), IBM("vD0E3EUb8-8", "Context Engineering vs. Prompt Engineering: Smarter AI with RAG & Agents"), IBM("Qx0fCqpkBus", "What Is Context Engineering? Why It Matters for AI Agents")],
+    structured: [IBM("_pEEJu-2KKM", "LLMs and AI Agents: Transforming Unstructured Data")],
+    embeddings: [IBM("wgfSDrqYMJ4", "What are Word Embeddings?"), IBM("gl1r1XV0SLw", "What is a Vector Database? Powering Semantic Search & AI Applications")],
+    vectorstores: [IBM("t9IDoenf-lo", "What is a Vector Database?"), IBM("r0Dciuq0knU", "Top 3 RAG Retrieval Strategies: Sparse, Dense, & Hybrid Explained"), IBM("xc63tFIIfeA", "Why RAG Solutions Fail with Complex Documents & Vector Databases")],
+    rag: [IBM("UabBYexBD4k", "Is RAG Still Needed? Choosing the Best Approach for LLMs"), IBM("0z9_MhcYvcY", "What is Agentic RAG?"), IBM("Aw7iQjKAX2k", "GraphRAG vs. Traditional RAG: Higher Accuracy & Insight with LLM")],
+    tools: [IBM("h8gMhXYAv1k", "What is Tool Calling? Connecting LLMs to Your Data"), IBM("eur8dUO9mvE", "What is MCP? Integrate AI Agents with Databases & APIs"), IBM("7j1t3UZA1TY", "MCP vs API: Simplifying AI Agent Integration with External Data"), IBM("EyYJI8TPIj8", "How to Build an MCP Server for LLM Agents: Simplify AI Integration")],
+    agents: [IBM("F8NKVhkZZWI", "What are AI Agents?"), IBM("sWH0T4Zez6I", "Multi Agent Systems Explained: How AI Agents & LLMs Work Together"), IBM("ZVPlLaehjLk", "Agentic AI Frameworks Explained: Workflows, Multi-Agent, & Production"), IBM("qAF1NjEVHhY", "LangChain vs LangGraph: A Tale of Two Frameworks")],
+    evals: [IBM("trfUBIDeI1Y", "LLM as a Judge: Scaling AI Evaluation Strategies"), IBM("kDY4TodQwbg", "What are Large Language Model (LLM) Benchmarks?"), IBM("nVImVgKpoOY", "LLM & AI Agent Benchmarks vs Reality: Why AI Applications Break")],
+    safety: [IBM("jrHRe9lSqqA", "What Is a Prompt Injection Attack?"), IBM("cYuesqIKf9A", "Explained: The OWASP Top 10 for Large Language Model Applications"), IBM("5ZA1lTxTH3c", "Securing AI Agents: How to Prevent Hidden Prompt Injection Attacks")],
+    llmops: [IBM("cvPEiPt7HXo", "Large Language Model Operations (LLMOps) Explained"), IBM("u57EnkQaUTY", "What is Prompt Caching? Optimize LLM Latency with AI Transformers"), IBM("XtT5i0ZeHHE", "AI Inference: The Secret to AI's Superpowers")],
+    mlbasics: [IBM("9gGnTQTYNaE", "What is Machine Learning?"), IBM("q6kJ71tEYqM", "Machine Learning vs Deep Learning"), IBM("jmmW0F0biz0", "Neural Networks Explained in 5 minutes")],
+    tokenization: [IBM("-QVoIxEpFkM", "What is a Context Window? Unlocking LLM Secrets")],
+    customization: [IBM("00Q0G84kq3M", "RAG vs. Fine Tuning"), IBM("zYGDpG-pTho", "RAG vs Fine-Tuning vs Prompt Engineering: Optimizing AI Models"), IBM("-W2JdSl1v48", "Is Fine-Tuning Still Needed? LLMs, RAG, & LoRA"), IBM("T_X4XFwKX8k", "Reinforcement Learning from Human Feedback (RLHF) Explained")],
+    multimodal: [IBM("J51oZYcNvP8", "What is Multimodal AI? How LLMs Process Text, Images, and More"), IBM("lOD_EE96jhM", "What Are Vision Language Models? How AI Sees & Understands Images"), IBM("anLahYrEFiQ", "What is Multimodal RAG? Unlocking LLMs with Vector Databases")],
+    cloudai: [IBM("81FbpXpfxTc", "AI Models as a Service: Powering Agentic AI, Privacy, & RAG"), IBM("RRKwmeyIc24", "What Is an AI Stack? LLMs, RAG, & AI Hardware")],
+  },
+});

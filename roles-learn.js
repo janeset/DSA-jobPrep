@@ -10,7 +10,19 @@ const ROLES = {
   tabs: [["overview", "Overview"], ["skills", "Skills"], ["postings", "Postings"], ["learn", "Learn"], ["questions", "Questions"], ["quiz", "Quiz"], ["labs", "Projects"]],
   tagLabel: "All roles",
   tagNames: { ai: "AI Engineer", cloud: "Cloud Engineer", aicloud: "AI Cloud Engineer" },
-  weeks: [], certs: [], videos: {},
+  weeks: [], certs: [],
+  channel: IBM_CHANNEL,
+  // IBM Technology explainers (ids and titles confirmed via YouTube oEmbed).
+  videos: {
+    selfhost: [IBM("McLdlg5Gc9s", "What is vLLM? Efficient AI Inference for Large Language Models"), IBM("5RIOQuHOihY", "What is Ollama? Running Local LLMs Made Simple"), IBM("0ujh7hfutq0", "Llama.cpp vs vLLM: Which Local LLM Engine Actually Scales?"), IBM("o0gkdZBtwEg", "How KV Cache Speeds Up LLMs for Faster AI Models on GPUs")],
+    entagents: [IBM("BacJ6sEhqMo", "The Four Types of Memory Every AI Agent Needs"), IBM("9iS-YYLIXiw", "What is Human In The Loop with AI? How HITL Shapes AI Systems"), IBM("cmEJ-5zYKHA", "Why AI Agents Need A Human in the Loop Now"), IBM("UMYtqHptYvA", "Guide to Architect Secure AI Agents: Best Practices for Safety")],
+    permrag: [IBM("r0Dciuq0knU", "Top 3 RAG Retrieval Strategies: Sparse, Dense, & Hybrid Explained"), IBM("y7sXDpffzQQ", "What is a Knowledge Graph?"), IBM("Za7aG-ooGLQ", "GraphRAG Explained: AI Retrieval with Knowledge Graphs & Cypher")],
+    gpucloud: [IBM("qZBibWYcKH4", "How AI Models Scale Beyond a Single GPU Across LLM Workloads"), IBM("LfdK-v0SbGI", "GPUs: Explained"), IBM("XtT5i0ZeHHE", "AI Inference: The Secret to AI's Superpowers")],
+    openshift: [IBM("KTN_QBuDplo", "What is OpenShift?"), IBM("ZsOR8RkAOwI", "Kubernetes vs. OpenShift"), IBM("CNKGgOphAPM", "LLM‑D Explained: Building Next‑Gen AI with LLMs, RAG & Kubernetes")],
+    aiobs: [IBM("hLvwoow3XTk", "OpenTelemetry: Simplifying Hybrid Cloud Monitoring"), IBM("jWDCnJKouhw", "Are Your AI Agents Flying Blind? The Truth About AgentOps"), IBM("iZX6d0OdZys", "What Is MLflow? Tracing AI Agents & LLM Workflows")],
+    mfgdata: [IBM("2hnoGo27uf8", "What is a Digital Twin?")],
+    aicoding: [IBM("mViFYTwWvcM", "Spec-Driven Development: AI Assisted Coding Explained"), IBM("4wMRXmLpdA8", "AI in the SDLC: Rethinking AI Coding Tools & AI Agents"), IBM("c57vAe-mMLo", "How AI Is Changing Code Reviews & Software Development")],
+  },
   groups: [
     ["Building AI systems", ["selfhost", "entagents", "permrag", "aifrontend"]],
     ["Data & integration", ["pgvector", "integration", "mfgdata"]],

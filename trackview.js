@@ -48,6 +48,7 @@ function ring(pct, label, size = 120) {
     <div class="ring-label"><b>${Math.round(pct * 100)}%</b><span>${label}</span></div></div>`;
 }
 const topicById = (T, tid) => T.topics.find((t) => t.id === tid);
+const channelLink = (T, prefix = "") => T.channel ? `<a class="btn small ghost" href="${T.channel.url}" target="_blank" rel="noopener">${prefix}${esc(T.channel.name)} channel &nearr;</a>` : "";
 const goLearn = (id, tid) => `data-trgo="${id}|learn|${tid}"`;
 
 // ---------------- navigation ----------------
@@ -189,7 +190,7 @@ function trOverview(T, st) {
       <div class="card"><div class="section-head"><h3>Certifications</h3><button class="btn small ghost" data-trgo="${id}|certs|">All certs &rarr;</button></div>
         <div class="list">${T.certs.map((c) => `<div class="li"><div><span class="t">${esc(c.code)}</span><div class="muted">${esc(c.name)}</div></div><span class="badge ${st.certs[c.id]?.status === "Passed" ? "done" : "plain"}">${esc(st.certs[c.id]?.status || "Not planned")}</span></div>`).join("")}</div></div>
     </div>
-    <div class="card"><h3>Full courses</h3>${vids(T.videos.courses)}</div>`;
+    <div class="card"><div class="section-head"><h3>Full courses</h3>${channelLink(T, "Recommended channel: ")}</div>${vids(T.videos.courses)}</div>`;
 }
 
 function trRoadmap(T, st) {
@@ -247,7 +248,7 @@ function trTopic(T, st, tid) {
     ${exercises ? `<div class="label" style="margin:6px 0 8px">Coding exercises (run in your browser)</div>${exercises}` : ""}
     <div class="card"><h3>Check yourself</h3>${t.cards.map(([q, a], k) => { const key = `${id}:${tid}:${k}`; return `<div class="flash"><div class="row between"><b>${esc(q)}</b>
       <button class="btn small ${shown[key] ? "ghost" : ""}" data-trq="${key}">${shown[key] ? "Hide" : "Show answer"}</button></div>${shown[key] ? `<p class="flash-a">${esc(a)}</p>` : ""}</div>`; }).join("")}</div>
-    <div class="card"><div class="section-head"><h3>Videos</h3><a class="btn small" href="${yt(t.yt || t.title + (id === "cloud" ? " AWS Azure explained" : " LLM explained"))}" target="_blank" rel="noopener">More videos &nearr;</a></div>
+    <div class="card"><div class="section-head"><h3>Videos</h3><span class="row"><a class="btn small" href="${yt(t.yt || t.title + (id === "cloud" ? " AWS Azure explained" : " LLM explained"))}" target="_blank" rel="noopener">More videos &nearr;</a>${channelLink(T)}</span></div>
       ${vlist.length ? vids(vlist) : `<p class="muted">No verified video for this topic yet; the search link finds popular ones. The full courses cover it too.</p>`}</div>
     <div class="row" style="margin-bottom:var(--gap)"><button class="btn ${read ? "" : "primary"}" data-trread="${id}|${tid}">${read ? "Reviewed ✓ (undo)" : "Mark as reviewed"}</button>
       <button class="btn ghost" data-trgo="${id}|questions|${tid}">Interview questions on this</button><button class="btn ghost" data-trgo="${id}|quiz|${tid}">Quiz on this</button></div>
